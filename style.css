@@ -1,0 +1,35 @@
+.select-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+.select-image-link {
+    font-size: 18px;
+    
+}
+.select-image-text {
+    font-size: 20px;
+    padding-right: 10px;
+}
+
+.image-preview {
+    margin-left: auto;
+    margin-right: auto;
+    width: 800px;
+    height: 500px;
+    border: 2px solid grey;
+    margin-top: 20px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: lightgrey;
+    font-size: 25px;
+}
+
+.image-preview__image {
+    display: none;
+    width: 100%;
+}
