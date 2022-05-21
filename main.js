@@ -32,8 +32,6 @@ inpFile.addEventListener("change", function() {
           base_image.onload = function(){
             myCanvas.width = this.naturalWidth;
             myCanvas.height = this.naturalHeight;
-            hRatio = myCanvas.width / this.naturalWidth;
-            vRatio = myCanvas.height /this.naturalHeight;
             context.drawImage(this, 0, 0);
           }
         }
