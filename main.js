@@ -5,7 +5,12 @@ const previewContainer = $('#imagePreview')
 const previewImage = document.getElementById('fileIMG')
 const previewDefaultText = $('.image-preview__default-text')
 const canvasCrop = document.getElementById('canvas');
- canvasCrop.style.display = "none";
+const downloadContainer = $('.download-container');
+const downloadBtn = $('.download');
+canvasCrop.style.display = "none";
+const myCanvas = $('.test');
+const resize_canvas = document.createElement('canvas')
+
 inpFile.addEventListener("change", function() {
     var file = this.files[0]
     
@@ -17,36 +22,39 @@ inpFile.addEventListener("change", function() {
         // reader.readAsDataURL(file)
         window.URL = window.URL || window.webkitURL;
         var blobURL = window.URL.createObjectURL(file);
-        document.getElementById('fileIMG').innerHTML = '<img src="' + blobURL + '" alt="Image preview" class="image-preview__image previewed_img" />';
-        canvasCrop.style.display = null;
-        var previewedImg = document.querySelector('.previewed_img');
-
-
-    // KHÚC NÀY EM CẦN SET ĐỂ LINE 79 canvas nó trong thg img thôi, hiện tại nó chỉ trong imgContainer
-        console.log(previewContainer.offsetHeight);       // ---> 0 ???         
-                                    
-        // previewContainer.style.width = previewedImg.offsetWidth + 'px';
-        // previewContainer.style.height = previewedImg.offsetHeight + 'px';
-
+        context = myCanvas.getContext('2d');
+        
+        make_base();
+        function make_base()
+        {
+          base_image = new Image();
+          base_image.src = blobURL;
+          base_image.onload = function(){
+            myCanvas.width = this.naturalWidth;
+            myCanvas.height = this.naturalHeight;
+            hRatio = myCanvas.width / this.naturalWidth;
+            vRatio = myCanvas.height /this.naturalHeight;
+            context.drawImage(this, 0, 0);
+          }
+        }
+    
+        myCanvas.style.display = "block";
+        canvasCrop.style.display = null;     
+        downloadBtn.addEventListener('click',downloadfuc)
     } else {
         canvasCrop.style.display = "none";
         previewDefaultText.style.display = null;
         previewImage.style.display = "none";
-        previewImage.setAttribute("scr", "")
     }
 })
 
 
 dragElement(canvasCrop);
-canvasCrop.addEventListener('dragstart', dragStart);
-function dragStart(){
-  console.log('start')
-}
+
 // Drag
 // dragElement(canvasCrop);
 function dragElement(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    canvasCrop.onmousedown = dragMouseDown;
     elmnt.onmousedown = dragMouseDown;
     
 function dragMouseDown(e) {
@@ -74,28 +82,26 @@ function dragMouseDown(e) {
     
     var rect = previewContainer.getBoundingClientRect();
     var rect2 = canvasCrop.getBoundingClientRect();
-
-
 // NGĂN KO CHO CANVAS CHẠY RA NGOÀI
     if(rect.top > rect2.top) {
-        elmnt.style.top = 0 + "px";
+        elmnt.style.top = -2 + "px";
     }
     if(rect.bottom < rect2.bottom) {
         elmnt.style.top = null;
-        elmnt.style.bottom = 0 + "px";
+        elmnt.style.bottom = -2 + "px";
     }
   
     if(rect.left > rect2.left) {
         
         // elmnt.style.top = null;
-        elmnt.style.left = 0 + "px";
+        elmnt.style.left = -2 + "px";
     }
     if(rect.right < rect2.right) {
         
         elmnt.style.left = null;
-        elmnt.style.right = 0 + "px";
+        elmnt.style.right = -2 + "px";
     }
-    // if(canvasCrop.style.top === previewedImg.style.top) console.log('test')
+    console.log(rect2.top, rect2.left)
   }
 
   function closeDragElement() {
@@ -105,3 +111,29 @@ function dragMouseDown(e) {
   }
 }
 
+// DOWNLOAD IMG
+function crop() {
+  resize_canvas.width = 300;
+  resize_canvas.height = 300;
+  var imgToaDo = myCanvas.getBoundingClientRect();
+  var rect2 = canvasCrop.getBoundingClientRect();
+  var img_x = imgToaDo.left - rect2.left;
+  var img_y = imgToaDo.top - rect2.top;
+  var ctx = resize_canvas.getContext('2d');
+    ctx.drawImage(myCanvas,img_x,img_y, myCanvas.clientWidth, myCanvas.clientHeight);
+}
+var downloadfuc = function() {
+  crop();
+  //create a temporary link for the download item
+  let tempLink = document.createElement('a');
+
+  //generate a new filename
+  let fileName = `image-cropped.jpg`;
+  
+  //configure the link to download the resized image
+  tempLink.download = fileName;
+  tempLink.href = resize_canvas.toDataURL("image/jpeg", 1.0);
+
+  //trigger a click on the link to start the download
+  tempLink.click();
+};
