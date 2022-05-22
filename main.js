@@ -1,5 +1,6 @@
 const $ = document.querySelector.bind(document)
 const $$ = document.querySelectorAll.bind(document)
+const img_previewedContainner = $('#imageContainer');
 const inpFile = $('.inpFile')
 const previewContainer = $('#imagePreview')
 const previewImage = document.getElementById('fileIMG')
@@ -7,24 +8,26 @@ const previewDefaultText = $('.image-preview__default-text')
 const canvasCrop = document.getElementById('canvas');
 const downloadContainer = $('.download-container');
 const downloadBtn = $('.download');
-canvasCrop.style.display = "none";
 const myCanvas = $('.test');
 const resize_canvas = document.createElement('canvas')
-
+resize_canvas.classList.add('resize-canvas')
+const resizeImgPreview = $('.resized-img')
+img_previewedContainner.appendChild(resize_canvas)
+canvasCrop.style.display = "none";
 inpFile.addEventListener("change", function() {
     var file = this.files[0]
     
     if (file) {
-
+       
         previewDefaultText.style.display = "none";
         previewImage.style.display = "block";
-
         // reader.readAsDataURL(file)
         window.URL = window.URL || window.webkitURL;
         var blobURL = window.URL.createObjectURL(file);
         context = myCanvas.getContext('2d');
         
         make_base();
+        myCanvas.style.display = "block";
         function make_base()
         {
           base_image = new Image();
@@ -33,29 +36,35 @@ inpFile.addEventListener("change", function() {
             myCanvas.width = this.naturalWidth;
             myCanvas.height = this.naturalHeight;
             context.drawImage(this, 0, 0);
+            crop();
           }
         }
-    
-        myCanvas.style.display = "block";
         canvasCrop.style.display = null;     
         downloadBtn.addEventListener('click',downloadfuc)
+        dragElement(canvasCrop);
+        resize_canvas.style.display = "block";
+        
     } else {
         canvasCrop.style.display = "none";
         previewDefaultText.style.display = null;
         previewImage.style.display = "none";
+        resize_canvas.style.display = null;
+
     }
+
 })
 
 
-dragElement(canvasCrop);
+
 
 // Drag
-// dragElement(canvasCrop);
 function dragElement(elmnt) {
+  
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     elmnt.onmousedown = dragMouseDown;
     
 function dragMouseDown(e) {
+  //  crop();
     e = e || window.event;
     e.preventDefault();
     // get the mouse cursor position at startup:
@@ -63,9 +72,12 @@ function dragMouseDown(e) {
     pos4 = e.clientY;
     document.onmouseup = closeDragElement;
     // call a function whenever the cursor moves:
-    document.onmousemove = elementDrag;
+    document.onmousemove = combine_drag_canvasPreview;
   }
-
+  function combine_drag_canvasPreview() {
+    elementDrag();
+    crop();
+  }
   function elementDrag(e) {
     e = e || window.event;
     e.preventDefault();
@@ -99,9 +111,9 @@ function dragMouseDown(e) {
         elmnt.style.left = null;
         elmnt.style.right = -2 + "px";
     }
-    console.log(rect2.top, rect2.left)
+    // console.log(rect2.top, rect2.left)
   }
-
+  
   function closeDragElement() {
     /* stop moving when mouse button is released:*/
     document.onmouseup = null;
@@ -118,7 +130,7 @@ function crop() {
   var img_x = imgToaDo.left - rect2.left;
   var img_y = imgToaDo.top - rect2.top;
   var ctx = resize_canvas.getContext('2d');
-    ctx.drawImage(myCanvas,img_x,img_y, myCanvas.clientWidth, myCanvas.clientHeight);
+  ctx.drawImage(myCanvas,img_x,img_y, myCanvas.clientWidth, myCanvas.clientHeight);
 }
 var downloadfuc = function() {
   crop();
@@ -127,7 +139,6 @@ var downloadfuc = function() {
 
   //generate a new filename
   let fileName = `image-cropped.jpg`;
-  
   //configure the link to download the resized image
   tempLink.download = fileName;
   tempLink.href = resize_canvas.toDataURL("image/jpeg", 1.0);
